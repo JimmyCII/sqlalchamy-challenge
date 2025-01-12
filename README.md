@@ -38,9 +38,9 @@ The project involves the following tasks:
     *   `/api/v1.0/<start>`: Returns TMIN, TAVG, and TMAX for all dates greater than or equal to the specified start date.
     *   `/api/v1.0/<start>/<end>`: Returns TMIN, TAVG, and TMAX for dates between the specified start and end dates, inclusive.
 
-## Expanded Challenge: Interactive Webpage with Google AI Assistance
+## Expanded Challenge: To create an Interactive Webpage with Google AI Assistance
 
-This project expands beyond the base requirements by creating an interactive webpage that leverages the API endpoints developed. It was assisted by Google AI to implement the front-end. This effort includes:
+ Run the FlaskApp.py file to see an interactive web page that leverages the API endpoints developed. It was assisted by Google AI to implement the front-end. This effort includes:
 
 *   **Dynamic API Interaction:** Using HTML, CSS, and JavaScript to build a user interface to interact with each API endpoint.
 
