@@ -1,0 +1,63 @@
+body {
+    font-family: sans-serif;
+    margin: 20px;
+    background-color: #f0f8ff; /* Light blue for the sea */
+}
+
+h1 {
+  color: #34626c; /* Deep Ocean Blue */
+  text-align: center;
+}
+
+.api-section {
+    border: 1px solid #8fbc8f; /* Sea Green */
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #e0ffff;/*Light Cyan Background*/
+}
+
+select,
+input[type="date"],
+button {
+    padding: 8px;
+    margin: 5px;
+    border: 1px solid #4682B4; /* Steel Blue */
+   background-color: #fff8dc; /* Cornsilk Background */
+}
+
+#output-container {
+    margin-top: 20px;
+}
+
+#output-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#output-container th,
+#output-container td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#output-container th {
+    background-color: #f2f2f2;
+}
+
+#output-container ul {
+    padding-left: 20px;
+}
+
+#plot-container {
+    margin-top: 20px;
+}
+
+#plot-container img {
+    max-width: 100%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
