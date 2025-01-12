@@ -11,12 +11,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 
 # Import Flask
-from flask import Flask, jsonify, render_template
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-import io
-import base64
-from io import StringIO
+from flask import Flask, jsonify
 
 #################################################
 # Database Setup
@@ -48,63 +43,14 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     """List all available API routes."""
-
-     # Start session
-    session = Session(engine)
-
-    # Calculate the date one year from the most recent date in data set.
-    most_recent_date = session.query(func.max(Measurement.date)).first()
-    last_date = dt.datetime.strptime(most_recent_date[0], '%Y-%m-%d')
-    one_year_ago = last_date - dt.timedelta(days=365)
-
-    # Perform a query to retrieve the data and precipitation scores
-    precipitation_data = session.query(Measurement.date, Measurement.prcp).filter(Measurement.date >= one_year_ago).all()
-
-    # Convert query to df and then plot
-    precipitation_df = pd.DataFrame(precipitation_data, columns=['date', 'prcp'])
-    precipitation_df.sort_values(by= 'date', inplace=True)
-    fig_precip = Figure(figsize=(10, 6), dpi=100)
-    ax_precip = fig_precip.add_subplot(111)
-    precipitation_df.plot(x='date', y='prcp', ax=ax_precip, title="Precipitation Over the Last 12 Months", legend=False)
-
-    ax_precip.set_xlabel('Date')
-    ax_precip.set_ylabel('Percipitation (inches)')
-    ax_precip.tick_params(axis='x', rotation=90)
-    fig_precip.tight_layout()
-        
-    
-    # Convert to a base64 encoded image string
-    buffer = io.BytesIO()
-    FigureCanvas(fig_precip).print_png(buffer)
-    buffer.seek(0)
-    plot_img_base64 = base64.b64encode(buffer.read()).decode('utf-8')
-    plot_html = f'<img src="data:image/png;base64,{plot_img_base64}" alt="Precipitation Plot">'
-
-    # Using the most active station id
-    most_active_station_id = 'USC00519281' 
-    tobs_data = session.query(Measurement.tobs)\
-                    .filter(Measurement.station == most_active_station_id)\
-                    .filter(Measurement.date >= one_year_ago)\
-                    .all()
-    
-    tobs_df = pd.DataFrame(tobs_data, columns=['tobs'])
-
-    fig_tobs = Figure(figsize=(6, 5), dpi=100)
-    ax_tobs = fig_tobs.add_subplot(111)
-    tobs_df.plot.hist(bins=12, ax =ax_tobs, title="Temperature Observations (TOBS) for Most Active Station")
-    ax_tobs.set_xlabel('Temperature')
-    fig_tobs.tight_layout()
-
-
-    buffer_tobs = io.BytesIO()
-    FigureCanvas(fig_tobs).print_png(buffer_tobs)
-    buffer_tobs.seek(0)
-    plot_tobs_base64 = base64.b64encode(buffer_tobs.read()).decode('utf-8')
-    plot_tobs_html = f'<img src="data:image/png;base64,{plot_tobs_base64}" alt="TOBS Plot">'
-    session.close()
-
-    return render_template('index.html', plot_html = plot_html, plot_tobs_html = plot_tobs_html)
-    
+    return (
+        f"Available Routes:<br/>"
+        f"/api/v1.0/precipitation<br/>"
+        f"/api/v1.0/stations<br/>"
+        f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/&lt;start&gt;<br/>"
+        f"/api/v1.0/&lt;start&gt;/&lt;end&gt;<br/>"
+    )
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
@@ -153,7 +99,7 @@ def tobs():
                        .filter(Measurement.station == most_active_station_id)\
                        .filter(Measurement.date >= one_year_ago)\
                        .all()
-    session.close()
+    
     tobs_list = {date: tobs for date, tobs in tobs_data}
     return jsonify(tobs_list)
 
@@ -163,17 +109,8 @@ def get_temps_start(start):
     start_date = dt.datetime.strptime(start, '%Y-%m-%d').date()
     results = session.query(func.min(Measurement.tobs),func.avg(Measurement.tobs),func.max(Measurement.tobs))\
                 .filter(Measurement.date >= start_date).all()
-    session.close()
-    min_temp = results[0][0]
-    avg_temp = results[0][1]
-    max_temp = results[0][2]
-
-    temps =  {"Min Temp": min_temp,
-                 "Avg Temp": avg_temp,
-                 "Max Temp": max_temp
-                }
-
-
+    session = Session(engine)
+    temps = list(np.ravel(results))
     return jsonify(temps)
 
 @app.route("/api/v1.0/<start>/<end>")
@@ -184,17 +121,12 @@ def get_temps_start_end(start, end):
     results = session.query(func.min(Measurement.tobs),func.avg(Measurement.tobs),func.max(Measurement.tobs))\
                 .filter(Measurement.date >= start_date)\
                 .filter(Measurement.date <= end_date).all()
-    session.close()
-
-    min_temp = results[0][0]
-    avg_temp = results[0][1]
-    max_temp = results[0][2]
-
-    temps =  {"Min Temp": min_temp,
-                 "Avg Temp": avg_temp,
-                 "Max Temp": max_temp
-                }
+    session = Session(engine)
+    temps = list(np.ravel(results))
     return jsonify(temps)
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+# Close Session
+# session.close()
